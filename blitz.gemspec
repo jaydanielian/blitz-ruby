@@ -83,8 +83,8 @@ Gem::Specification.new do |s|
       s.add_runtime_dependency(%q<hexy>, ["~> 0.1.1"])
       s.add_runtime_dependency(%q<term-ansicolor>, ["= 1.0.5"])
       s.add_runtime_dependency(%q<rake>, ["~> 0.9.0"])
-      s.add_development_dependency(%q<bundler>, ["~> 1.0.0"])
-      s.add_development_dependency(%q<jeweler>, ["~> 1.5.1"])
+      s.add_development_dependency(%q<bundler>, ["~> 1.1.0"])
+      s.add_development_dependency(%q<jeweler>, ["~> 1.8.4"])
     else
       s.add_dependency(%q<couchrest>, ["~> 1.0.1"])
       s.add_dependency(%q<rest-client>, ["~> 1.6.1"])
@@ -93,8 +93,8 @@ Gem::Specification.new do |s|
       s.add_dependency(%q<hexy>, ["~> 0.1.1"])
       s.add_dependency(%q<term-ansicolor>, ["= 1.0.5"])
       s.add_dependency(%q<rake>, ["~> 0.9.0"])
-      s.add_dependency(%q<bundler>, ["~> 1.0.0"])
-      s.add_dependency(%q<jeweler>, ["~> 1.5.1"])
+      s.add_dependency(%q<bundler>, ["~> 1.1.0"])
+      s.add_dependency(%q<jeweler>, ["~> 1.8.4"])
     end
   else
     s.add_dependency(%q<couchrest>, ["~> 1.0.1"])
@@ -104,8 +104,8 @@ Gem::Specification.new do |s|
     s.add_dependency(%q<hexy>, ["~> 0.1.1"])
     s.add_dependency(%q<term-ansicolor>, ["= 1.0.5"])
     s.add_dependency(%q<rake>, ["~> 0.9.0"])
-    s.add_dependency(%q<bundler>, ["~> 1.0.0"])
-    s.add_dependency(%q<jeweler>, ["~> 1.5.1"])
+    s.add_dependency(%q<bundler>, ["~> 1.1.0"])
+    s.add_dependency(%q<jeweler>, ["~> 1.8.4"])
   end
 end
 
