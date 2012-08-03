@@ -163,109 +163,111 @@ class Curl < Command # :nodoc:
             end
            
             job.result do |result|
-                if file
-                  csv_rush_result file, result, last_index
-                else
-                  print_rush_result job.args, result, last_index
-                end
+              if file
+                csv_rush_result file, result, last_index
+              else
+                print_rush_result job.args, result, last_index
+              end
 
-                if not result.timeline.empty?
-                    last_index = result.timeline.size
-                end
-                sleep 2.0 if not continue
-                continue
+              if not result.timeline.empty?
+                last_index = result.timeline.size
+              end
+              sleep 2.0 if not continue
+              continue
             end
             puts
             msg "[#{red('aborted')}]" if not continue
         rescue ::Blitz::Curl::Error::Authorize => e
-            authorize_error e
+          authorize_error e
         rescue ::Blitz::Curl::Error::Region => e
-            error "#{yellow(e.region)}: #{red(e.message)}"
+          error "#{yellow(e.region)}: #{red(e.message)}"
         rescue ::Blitz::Curl::Error => e
-            error red(e.message)
+          error red(e.message)
         ensure
-            file.close if file
+          file.close if file
         end
     end
-    
+
     def print_rush_result args, result, last_index
-        if last_index.nil?
-            print yellow("%6s " % "Time")
-            print "%6s " % "Users"
-            print green("%8s " % "Response")
-            print green("%8s " % "Hits")
-            print magenta("%8s " % "Timeouts")
-            print red("%8s " % "Errors")
-            print green("%8s " % "Hits/s")
-            print "%s" % "Mbps"
-            puts
-        end
-        
-        if last_index and result.timeline.size == last_index
-            return
-        end
-        
-        last = result.timeline[-2]
-        curr = result.timeline[-1]
-        print yellow("%5.1fs " % curr.timestamp)
-        print "%6d " % curr.volume
-        print green("%7.3fs " % curr.duration)
-        print green("%8d " % curr.hits)
-        print magenta("%8d " % curr.timeouts)
-        print red("%8d " % curr.errors)
-        
-        if last
-            elapsed = curr.timestamp - last.timestamp
-            mbps = ((curr.txbytes + curr.rxbytes) - (last.txbytes + last.rxbytes))/elapsed/1024.0/1024.0
-            htps = (curr.hits - last.hits)/elapsed
-            print green(" %7.2f " % htps)
-            print "%.2f" % mbps
-        end
-        
-        print "\n"
+      if last_index.nil?
+        print yellow("%6s " % "Time")
+        print "%6s " % "Users"
+        print green("%8s " % "Response")
+        print green("%8s " % "Hits")
+        print magenta("%8s " % "Timeouts")
+        print red("%8s " % "Errors")
+        print green("%8s " % "Hits/s")
+        print "%s" % "Mbps"
+        puts
+      end
+
+      if last_index and result.timeline.size == last_index
+        return
+      end
+
+      last = result.timeline[-2]
+      curr = result.timeline[-1]
+      print yellow("%5.1fs " % curr.timestamp)
+      print "%6d " % curr.volume
+      print green("%7.3fs " % curr.duration)
+      print green("%8d " % curr.hits)
+      print magenta("%8d " % curr.timeouts)
+      print red("%8d " % curr.errors)
+
+      if last
+        elapsed = curr.timestamp - last.timestamp
+        mbps = ((curr.txbytes + curr.rxbytes) - (last.txbytes + last.rxbytes))/elapsed/1024.0/1024.0
+        htps = (curr.hits - last.hits)/elapsed
+        print green(" %7.2f " % htps)
+        print "%.2f" % mbps
+      end
+
+      print "\n"
     end
 
     def csv_rush_result file, result, last_index
-        if last_index.nil?
-            file << ["Time", "Users", "Response", "Hits", "Timeouts", "Errors", "Hits/s", "Mbps"]
-        end
-        
-        if last_index and result.timeline.size == last_index
-            return
-        end
-        
-        last = result.timeline[-2]
-        curr = result.timeline[-1]
-        arr  = [curr.timestamp, curr.volume, curr.duration, curr.hits, curr.timeouts, curr.errors ]
-        
-        if last
-            elapsed = curr.timestamp - last.timestamp
-            mbps = ((curr.txbytes + curr.rxbytes) - (last.txbytes + last.rxbytes))/elapsed/1024.0/1024.0
-            htps = (curr.hits - last.hits)/elapsed
-            arr << htps
-            arr << mbps
-        end
+      if last_index.nil?
+        file << ["Time", "Users", "Response", "Hits", "Timeouts", "Errors", "Hits/s", "Mbps"]
+      end
 
-        file << arr 
+      if last_index and result.timeline.size == last_index
+        return
+      end
+
+      last = result.timeline[-2]
+      curr = result.timeline[-1]
+      arr  = [curr.timestamp, curr.volume, curr.duration, curr.hits, curr.timeouts, curr.errors ]
+
+      if last
+        elapsed = curr.timestamp - last.timestamp
+        mbps = ((curr.txbytes + curr.rxbytes) - (last.txbytes + last.rxbytes))/elapsed/1024.0/1024.0
+        htps = (curr.hits - last.hits)/elapsed
+        arr << htps
+        arr << mbps
+      end
+
+      file << arr 
     end
 
     def help
-        helps = [
-            { :short => '-A', :long => '--user-agent', :value => '<string>', :help => 'User-Agent to send to server' },
-            { :short => '-b', :long => '--cookie', :value => 'name=<string>', :help => 'Cookie to send to the server (multiple)' },
-            { :short => '-d', :long => '--data', :value => '<string>', :help => 'Data to send in a PUT or POST request' },
-            { :short => '-D', :long => '--dump-header', :value => '<file>', :help => 'Print the request/response headers' },
-            { :short => '-e', :long => '--referer', :value => '<string>', :help => 'Referer URL' },
-            { :short => '-h', :long => '--help', :value => '', :help => 'Help on command line options' },
-            { :short => '-H', :long => '--header', :value => '<string>', :help => 'Custom header to pass to server' },
-            { :short => '-p', :long => '--pattern', :value => '<s>-<e>:<d>', :help => 'Ramp from s to e concurrent requests in d secs' },
-            { :short => '-r', :long => '--region', :value => '<string>', :help => 'california|oregon|virginia|singapore|ireland|japan' },
-            { :short => '-s', :long => '--status', :value => '<number>', :help => 'Assert on the HTTP response status code' },
-            { :short => '-T', :long => '--timeout', :value => '<ms>', :help => 'Wait time for both connect and responses' },
-            { :short => '-u', :long => '--user', :value => '<user[:pass]>', :help => 'User and password for authentication' },
+      helps = [
+        { :short => '-A', :long => '--user-agent', :value => '<string>', :help => 'User-Agent to send to server' },
+        { :short => '-b', :long => '--cookie', :value => 'name=<string>', :help => 'Cookie to send to the server (multiple)' },
+        { :short => '-d', :long => '--data', :value => '<string>', :help => 'Data to send in a PUT or POST request' },
+        { :short => '-D', :long => '--dump-header', :value => '<file>', :help => 'Print the request/response headers' },
+        { :short => '-e', :long => '--referer', :value => '<string>', :help => 'Referer URL' },
+        { :short => '-h', :long => '--help', :value => '', :help => 'Help on command line options' },
+        { :short => '-H', :long => '--header', :value => '<string>', :help => 'Custom header to pass to server' },
+        { :short => '-p', :long => '--pattern', :value => '<s>-<e>:<d>', :help => 'Ramp from s to e concurrent requests in d secs' },
+        { :short => '-r', :long => '--region', :value => '<string>', :help => 'california|oregon|virginia|singapore|ireland|japan' },
+        { :short => '-s', :long => '--status', :value => '<number>', :help => 'Assert on the HTTP response status code' },
+        { :short => '-T', :long => '--timeout', :value => '<ms>', :help => 'Wait time for both connect and responses' },
+        { :short => '-u', :long => '--user', :value => '<user[:pass]>', :help => 'User and password for authentication' },
             { :short => '-X', :long => '--request', :value => '<string>', :help => 'Request method to use (GET, HEAD, PUT, etc.)' },
             { :short => '-v', :long => '--variable', :value => '<string>', :help => 'Define a variable to use' },
             { :short => '-V', :long => '--verbose', :value => '', :help => 'Print the request/response headers' },
+            { :short => '-f', :long => '--format', :value => '<string>', :help => 'Formatted output (csv)' },
+            { :short => '-o', :long => '--output', :value => '<string>', :help => 'Output file' },
             { :short => '-1', :long => '--tlsv1', :value => '', :help => 'Use TLSv1 (SSL)' },
             { :short => '-2', :long => '--sslv2', :value => '', :help => 'Use SSLv2 (SSL)' },
             { :short => '-3', :long => '--sslv3', :value => '', :help => 'Use SSLv3 (SSL)' }
