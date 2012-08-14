@@ -19,7 +19,7 @@ describe Blitz::Command::Curl do
             }
         }
     }
-    
+
     def mocked_sprint_request
         Blitz::Curl::Sprint::Request.new(sprint_data)
     end
@@ -47,6 +47,30 @@ describe Blitz::Command::Curl do
          } 
         }
         Blitz::Curl::Sprint::Result.new(sprint)
+    end
+
+    def mocked_rush
+      rush = {
+        'result' => {
+            'region' => 'california',
+            'timeline' => [
+                  'timestamp' => 1.50353,
+                  'volume' => 2,
+                  'duration' => 0.42632,
+                  'executed' => 2,
+                  'timeouts' => 0,
+                  'errors' => 0,
+                  'steps' => [
+                    'duration' => 0.0, 
+                    'connect' => 0.0,
+                    'errors' => 0, 
+                    'timeouts' => 5, 
+                    'asserts' => 0
+                  ]
+            ]
+        }
+      }
+      Blitz::Curl::Rush::Result.new(rush)
     end
     
     context "#print_sprint_header" do
@@ -90,51 +114,76 @@ describe Blitz::Command::Curl do
             }
         end
     end
-    
-    context "#print_sprint_result" do
-        def check_print_sprint_result args
-            result = mocked_sprint
-            obj = Blitz::Command::Curl.new
-            yield(obj, result)
-            obj.send(:print_sprint_result, args, result)
-        end
-        it "should not dump-header and verbose when they are not available" do
-            args = mocked_sprint_args
-            args.delete "verbose"
-            args.delete "dump-header"
-            check_print_sprint_result(args){|obj, result|
-                obj.should_receive(:puts).with("Transaction time \e[32m394 ms\e[0m")
-                obj.should_receive(:puts).with()
-                obj.should_receive(:puts).with("> GET www.example.com")
-                obj.should_receive(:puts).with("< 200 OK in \e[32m394 ms\e[0m")
-                obj.should_receive(:puts).with()
-            }
-        end
-        it "should dump-header and verbose when both are available" do
-            check_print_sprint_result(mocked_sprint_args){|obj, result|
-                obj.should_receive(:print_sprint_header).twice.and_return(true)
-                obj.should_receive(:print_sprint_content).twice.and_return(true)
-                result.should_receive(:respond_to?).with(:duration).and_return(false)
-            }
-        end
-        it "should only do verbose when dump-header is not available" do
-            args = mocked_sprint_args
-            args.delete "dump-header"
-            check_print_sprint_result(args){|obj, result|
-                obj.should_not_receive(:print_sprint_header)
-                obj.should_receive(:print_sprint_content).twice.and_return(true)
-                result.should_receive(:respond_to?).with(:duration).and_return(false)
-            }
-        end
-        it "should only do dump-header when verbose is not available" do
-            args = mocked_sprint_args
-            args.delete "verbose"
-            check_print_sprint_result(args){|obj, result|
-                obj.should_receive(:print_sprint_header).twice.and_return(true)
-                obj.should_not_receive(:print_sprint_content)
-                result.should_receive(:respond_to?).with(:duration).and_return(false)
-            }
-        end
+
+    context "#csv_rush_result" do
+
+      it "should check if the rush results get dumped in csv format" do
+        file = CSV.open('blitztest.csv', 'w')
+
+        result = mocked_rush 
+        obj = Blitz::Command::Curl.new
+        obj.send(:csv_rush_result, file, result, nil)
+        file.close
+        
+        file = CSV.open('blitztest.csv', 'r').read()
+        output = file.last
+        timeline = result.timeline.last
+
+        output[0].to_f.should eq(timeline.timestamp)
+        output[1].to_f.should eq(timeline.volume)
+        output[2].to_f.should eq(timeline.duration)
+        output[3].to_f.should eq(timeline.hits)
+        output[4].to_f.should eq(timeline.timeouts)
+
+        File.delete('blitztest.csv')
+      end
     end
-    
+
+    context "#print_sprint_result" do
+      def check_print_sprint_result args
+        result = mocked_sprint
+        obj = Blitz::Command::Curl.new
+        yield(obj, result)
+        obj.send(:print_sprint_result, args, result)
+      end
+
+      it "should not dump-header and verbose when they are not available" do
+        args = mocked_sprint_args
+        args.delete "verbose"
+        args.delete "dump-header"
+        check_print_sprint_result(args){|obj, result|
+          obj.should_receive(:puts).with("Transaction time \e[32m394 ms\e[0m")
+          obj.should_receive(:puts).with()
+          obj.should_receive(:puts).with("> GET www.example.com")
+          obj.should_receive(:puts).with("< 200 OK in \e[32m394 ms\e[0m")
+          obj.should_receive(:puts).with()
+        }
+      end
+      it "should dump-header and verbose when both are available" do
+        check_print_sprint_result(mocked_sprint_args){|obj, result|
+          obj.should_receive(:print_sprint_header).twice.and_return(true)
+          obj.should_receive(:print_sprint_content).twice.and_return(true)
+          result.should_receive(:respond_to?).with(:duration).and_return(false)
+        }
+      end
+      it "should only do verbose when dump-header is not available" do
+        args = mocked_sprint_args
+        args.delete "dump-header"
+        check_print_sprint_result(args){|obj, result|
+          obj.should_not_receive(:print_sprint_header)
+          obj.should_receive(:print_sprint_content).twice.and_return(true)
+          result.should_receive(:respond_to?).with(:duration).and_return(false)
+        }
+      end
+      it "should only do dump-header when verbose is not available" do
+        args = mocked_sprint_args
+        args.delete "verbose"
+        check_print_sprint_result(args){|obj, result|
+          obj.should_receive(:print_sprint_header).twice.and_return(true)
+          obj.should_not_receive(:print_sprint_content)
+          result.should_receive(:respond_to?).with(:duration).and_return(false)
+        }
+      end
+    end
+
 end
