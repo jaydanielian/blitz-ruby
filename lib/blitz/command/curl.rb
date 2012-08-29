@@ -157,8 +157,18 @@ class Curl < Command # :nodoc:
             job.queue
             msg "rushing from #{yellow(job.region)}..."
             puts
+
+            if job.args.member?('output')
+                file = CSV.open(job.args['output'] || 'blitz.csv', 'w')
+            end
+
             job.result do |result|
-                print_rush_result job.args, result, last_index
+                if file
+                    csv_rush_result file, result, last_index
+                else
+                    print_rush_result job.args, result, last_index
+                end
+
                 if not result.timeline.empty?
                     last_index = result.timeline.size
                 end
@@ -173,9 +183,11 @@ class Curl < Command # :nodoc:
             error "#{yellow(e.region)}: #{red(e.message)}"
         rescue ::Blitz::Curl::Error => e
             error red(e.message)
+        ensure
+            file.close if file
         end
     end
-    
+
     def print_rush_result args, result, last_index
         if last_index.nil?
             print yellow("%6s " % "Time")
@@ -188,11 +200,11 @@ class Curl < Command # :nodoc:
             print "%s" % "Mbps"
             puts
         end
-        
+
         if last_index and result.timeline.size == last_index
             return
         end
-        
+
         last = result.timeline[-2]
         curr = result.timeline[-1]
         print yellow("%5.1fs " % curr.timestamp)
@@ -201,7 +213,7 @@ class Curl < Command # :nodoc:
         print green("%8d " % curr.hits)
         print magenta("%8d " % curr.timeouts)
         print red("%8d " % curr.errors)
-        
+
         if last
             elapsed = curr.timestamp - last.timestamp
             mbps = ((curr.txbytes + curr.rxbytes) - (last.txbytes + last.rxbytes))/elapsed/1024.0/1024.0
@@ -209,8 +221,33 @@ class Curl < Command # :nodoc:
             print green(" %7.2f " % htps)
             print "%.2f" % mbps
         end
-        
+
         print "\n"
+    end
+
+    def csv_rush_result file, result, last_index
+        if last_index.nil?
+            file << ["Time", "Users", "Response", "Hits", "Timeouts", "Errors", "Hits/s", "Mbps"]
+        end
+
+        if last_index and result.timeline.size == last_index
+            return
+        end
+
+        last = result.timeline[-2]
+        curr = result.timeline[-1]
+        arr  = [curr.timestamp, curr.volume, curr.duration, curr.hits, curr.timeouts, curr.errors ]
+
+        if last
+            elapsed = curr.timestamp - last.timestamp
+            mbps = ((curr.txbytes + curr.rxbytes) - (last.txbytes + last.rxbytes))/elapsed/1024.0/1024.0
+            htps = (curr.hits - last.hits)/elapsed
+            arr << htps
+            arr << mbps
+        end
+
+        file << arr
+        file.flush
     end
 
     def help
@@ -230,6 +267,7 @@ class Curl < Command # :nodoc:
             { :short => '-X', :long => '--request', :value => '<string>', :help => 'Request method to use (GET, HEAD, PUT, etc.)' },
             { :short => '-v', :long => '--variable', :value => '<string>', :help => 'Define a variable to use' },
             { :short => '-V', :long => '--verbose', :value => '', :help => 'Print the request/response headers' },
+            { :short => '-o', :long => '--output', :value => '<filename>', :help => 'Output to file (CSV)' },
             { :short => '-1', :long => '--tlsv1', :value => '', :help => 'Use TLSv1 (SSL)' },
             { :short => '-2', :long => '--sslv2', :value => '', :help => 'Use SSLv2 (SSL)' },
             { :short => '-3', :long => '--sslv3', :value => '', :help => 'Use SSLv3 (SSL)' }

@@ -238,6 +238,17 @@ describe Blitz::Curl do
                 hash['steps'][1]['request'] == 'POST'
             end
         end
+
+        context "output" do
+            it "should check that a output is given" do
+                lambda { Blitz::Curl.parse_cli %w[--output] }.should raise_error(MiniTest::Assertion, /missing value/)
+            end
+
+            it "should support export to output file" do
+                hash = Blitz::Curl.parse_cli %w[-o test.csv /faq]
+                hash['output'].should == 'test.csv'
+            end
+        end
     end
     
     describe "xargv" do

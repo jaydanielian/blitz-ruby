@@ -19,7 +19,7 @@ describe Blitz::Command::Curl do
             }
         }
     }
-    
+
     def mocked_sprint_request
         Blitz::Curl::Sprint::Request.new(sprint_data)
     end
@@ -47,6 +47,30 @@ describe Blitz::Command::Curl do
          } 
         }
         Blitz::Curl::Sprint::Result.new(sprint)
+    end
+
+    def mocked_rush
+      rush = {
+        'result' => {
+            'region' => 'california',
+            'timeline' => [
+                  'timestamp' => 1.50353,
+                  'volume' => 2,
+                  'duration' => 0.42632,
+                  'executed' => 2,
+                  'timeouts' => 0,
+                  'errors' => 0,
+                  'steps' => [
+                    'duration' => 0.0,
+                    'connect' => 0.0,
+                    'errors' => 0,
+                    'timeouts' => 5,
+                    'asserts' => 0
+                  ]
+            ]
+        }
+      }
+      Blitz::Curl::Rush::Result.new(rush)
     end
     
     context "#print_sprint_header" do
@@ -90,7 +114,31 @@ describe Blitz::Command::Curl do
             }
         end
     end
-    
+
+    context "#csv_rush_result" do
+
+      it "should check if the rush results get dumped in csv format" do
+        file = CSV.open('blitztest.csv', 'w')
+
+        result = mocked_rush
+        obj = Blitz::Command::Curl.new
+        obj.send(:csv_rush_result, file, result, nil)
+        file.close
+
+        file = CSV.open('blitztest.csv', 'r').read()
+        output = file.last
+        timeline = result.timeline.last
+
+        output[0].to_f.should eq(timeline.timestamp)
+        output[1].to_f.should eq(timeline.volume)
+        output[2].to_f.should eq(timeline.duration)
+        output[3].to_f.should eq(timeline.hits)
+        output[4].to_f.should eq(timeline.timeouts)
+
+        File.delete('blitztest.csv')
+      end
+    end
+
     context "#print_sprint_result" do
         def check_print_sprint_result args
             result = mocked_sprint
@@ -98,6 +146,7 @@ describe Blitz::Command::Curl do
             yield(obj, result)
             obj.send(:print_sprint_result, args, result)
         end
+
         it "should not dump-header and verbose when they are not available" do
             args = mocked_sprint_args
             args.delete "verbose"
@@ -136,5 +185,5 @@ describe Blitz::Command::Curl do
             }
         end
     end
-    
+
 end

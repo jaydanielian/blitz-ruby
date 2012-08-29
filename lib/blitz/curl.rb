@@ -200,6 +200,11 @@ class Curl
                     next
                 end
 
+                if [ '-o', '--output'].member? k
+                    hash['output'] = shift(k, argv)
+                    next
+                end
+
                 raise ArgumentError, "Unknown option #{k}"
             end
 

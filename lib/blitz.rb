@@ -3,6 +3,7 @@ require 'term/ansicolor'
 require 'couchrest'
 require 'hexy'
 require 'pp'
+require 'csv'
 
 class Blitz # :nodoc:
     require 'blitz/helper'
