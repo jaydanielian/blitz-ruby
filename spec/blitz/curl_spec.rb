@@ -238,7 +238,7 @@ describe Blitz::Curl do
                 hash['steps'][1]['request'] == 'POST'
             end
         end
-        
+
         context "format" do
             it "should check that a format is given" do
                 lambda { Blitz::Curl.parse_cli %w[--format] }.should raise_error(MiniTest::Assertion, /missing value/)
