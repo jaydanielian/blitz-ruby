@@ -247,6 +247,7 @@ class Curl < Command # :nodoc:
         end
 
         file << arr
+        file.flush
     end
 
     def help
