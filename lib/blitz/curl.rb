@@ -205,11 +205,6 @@ class Curl
                     next
                 end
 
-                if [ '-f', '--format'].member? k
-                    hash['format'] = shift(k, argv)
-                    next
-                end
-
                 raise ArgumentError, "Unknown option #{k}"
             end
 

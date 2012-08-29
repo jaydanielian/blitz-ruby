@@ -158,7 +158,7 @@ class Curl < Command # :nodoc:
             msg "rushing from #{yellow(job.region)}..."
             puts
 
-            if job.args.member?('output') || job.args.member?('format')
+            if job.args.member?('output')
                 file = CSV.open(job.args['output'] || 'blitz.csv', 'w')
             end
 
@@ -266,8 +266,7 @@ class Curl < Command # :nodoc:
             { :short => '-X', :long => '--request', :value => '<string>', :help => 'Request method to use (GET, HEAD, PUT, etc.)' },
             { :short => '-v', :long => '--variable', :value => '<string>', :help => 'Define a variable to use' },
             { :short => '-V', :long => '--verbose', :value => '', :help => 'Print the request/response headers' },
-            { :short => '-f', :long => '--format', :value => '<string>', :help => 'Formatted output (csv)' },
-            { :short => '-o', :long => '--output', :value => '<string>', :help => 'Output file' },
+            { :short => '-o', :long => '--output', :value => '<filename>', :help => 'Output to file (CSV)' },
             { :short => '-1', :long => '--tlsv1', :value => '', :help => 'Use TLSv1 (SSL)' },
             { :short => '-2', :long => '--sslv2', :value => '', :help => 'Use SSLv2 (SSL)' },
             { :short => '-3', :long => '--sslv3', :value => '', :help => 'Use SSLv3 (SSL)' }
