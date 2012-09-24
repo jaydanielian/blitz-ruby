@@ -210,7 +210,7 @@ class Curl
 
             if step.member? 'content'
                 data_size = step['content']['data'].inject(0) { |m, v| m + v.size }
-                assert(data_size < 10*1024, "POST content must be < 10K")
+                assert(data_size < 20*1024, "POST content must be < 20KB")
             end
 
             break if hash['help']
