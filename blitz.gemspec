@@ -11,7 +11,10 @@ Gem::Specification.new do |s|
   s.authors = ["pcapr"]
   s.date = %q{2012-08-29}
   s.default_executable = %q{blitz}
-  s.description = %q{Make load and performance testing a fun sport}
+  s.description = <<-EOF
+    Command-line interface and Ruby client library for Blitz.io.
+    Make load and performance testing a fun sport.
+  EOF
   s.email = %q{support@blitz.io}
   s.executables = ["blitz"]
   s.extra_rdoc_files = [
