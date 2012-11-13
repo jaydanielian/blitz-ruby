@@ -27,7 +27,7 @@ class API < Command # :nodoc:
     end
     
     def host
-        ENV['BLITZ_HOST'] || 'blitz.io'
+        ENV['BLITZ_HOST'] || 'www.blitz.io'
     end
     
     def credentials_file
