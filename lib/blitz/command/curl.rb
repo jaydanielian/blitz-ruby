@@ -84,7 +84,7 @@ class Curl < Command # :nodoc:
             if /^[[:print:]]+$/ =~ content
                 puts content
             else
-                puts Hexy.new(content).to_s
+                Hexdump.dump(content, :width => 16)
             end
             puts
         end

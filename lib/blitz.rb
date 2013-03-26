@@ -1,7 +1,7 @@
 require 'rubygems'
 require 'term/ansicolor'
 require 'couchrest'
-require 'hexy'
+require 'hexdump'
 require 'pp'
 require 'csv'
 
