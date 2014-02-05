@@ -1,20 +1,20 @@
 require 'spec_helper'
 
 describe Blitz::Command::Curl do
-    
-    let(:sprint_data)  { 
+
+    let(:sprint_data)  {
         {
-            'line'=>"GET / HTTP/1.1", 
-            'method'=>"GET", 
-            'url'=>"www.example.com", 
+            'line'=>"GET / HTTP/1.1",
+            'method'=>"GET",
+            'url'=>"www.example.com",
             'content'=>"",
-            'status'=>200, 
-            'message'=>"OK", 
+            'status'=>200,
+            'message'=>"OK",
             'headers'=> {
-                "User-Agent"=>"blitz.io; 5f691b@11.22.33.250", 
-                "Host"=>"blitz.io", 
-                "X-Powered-By"=>"blitz.io", 
-                "X-User-ID"=>"5f6938a60e", 
+                "User-Agent"=>"blitz.io; 5f691b@11.22.33.250",
+                "Host"=>"blitz.io",
+                "X-Powered-By"=>"blitz.io",
+                "X-User-ID"=>"5f6938a60e",
                 "X-User-IP"=>"44.55.66.250"
             }
         }
@@ -23,28 +23,28 @@ describe Blitz::Command::Curl do
     def mocked_sprint_request
         Blitz::Curl::Sprint::Request.new(sprint_data)
     end
-    
+
     def mocked_sprint_args
         {
-            "steps"=>[{"url"=>"http://blitz.io"}], 
-            "region"=>"california", 
-            "dump-header"=>"/mocked/path/head.txt", 
+            "steps"=>[{"url"=>"http://blitz.io"}],
+            "region"=>"california",
+            "dump-header"=>"/mocked/path/head.txt",
             "verbose"=>true
         }
     end
-    
+
     def mocked_sprint
         sprint = {
          'result' => {
-             'region'=>"california", 
+             'region'=>"california",
              'duration'=> 0.39443,
              'steps'=>[
-                  'connect'=>0.117957, 
-                  'duration'=>0.394431, 
+                  'connect'=>0.117957,
+                  'duration'=>0.394431,
                   'request' => sprint_data,
                   'response' => sprint_data
-              ]  
-         } 
+              ]
+         }
         }
         Blitz::Curl::Sprint::Result.new(sprint)
     end
@@ -72,10 +72,9 @@ describe Blitz::Command::Curl do
       }
       Blitz::Curl::Rush::Result.new(rush)
     end
-    
+
     context "#print_sprint_header" do
         def check_print_sprint_header path="/mocked/path/head.txt"
-            myfile = StringIO.new
             request = mocked_sprint_request
             symbol = "> "
             mode = 'w'
@@ -102,7 +101,7 @@ describe Blitz::Command::Curl do
         end
         it "should print request headers to file" do
             check_print_sprint_header() {|obj, path, mode|
-                file = mock('file')
+                file = double('file')
                 File.should_receive(:open).with(path, mode).and_yield(file)
                 file.should_receive(:puts).with("")
                 file.should_receive(:puts).with("GET / HTTP/1.1")
