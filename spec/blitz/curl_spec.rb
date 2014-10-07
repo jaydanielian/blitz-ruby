@@ -265,7 +265,7 @@ describe Blitz::Curl do
           end
 
           it "should split custom separator fields and allow for string json objects" do
-            hash = Blitz::Curl.parse_cli %w[-v:myvar list[{"prop":"value"}~<$$>~{"prop":"value2"} ]sep:~<$$>~ POST /faq]
+            hash = Blitz::Curl.parse_cli %w[-v:myvar list[{"prop":["(423)dsfsf"]}~<$$>~{"prop":"value2","phones":"(404)4242232"}]sep:~<$$>~ -d POST /faq]
             hash['steps'][0]['variables']['myvar']['entries'].should == ['{"prop":"value"}','{"prop":"value2"}']
           end
 

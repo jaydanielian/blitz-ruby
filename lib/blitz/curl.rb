@@ -148,22 +148,25 @@ class Curl
                 if /-v:(\S+)/ =~ k or /--variable:(\S+)/ =~ k 
                     vname = $1
                     vargs = shift(k, argv)
-
-                    assert_match /^[a-zA-Z][a-zA-Z0-9]*$/, vname, 
+                    assert_match /^[a-zA-Z][a-zA-Z0-9]*$/, vname,
                         "variable name must be alphanumeric: #{vname}"
 
                     step['variables'] ||= Hash.new
                     vhash = step['variables'][vname] = Hash.new
-                    if vargs.match /^(list)?\[([^\]]+)\](sep:([^\w]+)?)?$/
+                    if vargs.match /^(list)?\[(\S+)?\](sep:([^\w]+)?)?$/  #/^(list)?\[([^\]]+)\](sep:([^\w]+)?)?$/
 
                         if $4.nil?
                           split_string = ','
+                          vhash['entries'] = $2.split(split_string)
                         else
-                          split_string = $4
+                          tail = $3
+                          string_to_split = vargs.gsub('list[', '')
+                          string_to_split.gsub!(tail, '')
+                          vhash['entries'] = string_to_split.split(split_string)
                         end
 
                         vhash['type'] = 'list'
-                        vhash['entries'] = $2.split(split_string)
+
                     elsif vargs.match /^(a|alpha)$/
                         vhash['type'] = 'alpha'
                     elsif vargs.match /^(a|alpha)\[(\d+),(\d+)(,(\d+))??\]$/
