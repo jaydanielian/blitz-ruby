@@ -249,6 +249,28 @@ describe Blitz::Curl do
                 hash['output'].should == 'test.csv'
             end
         end
+
+        context "variables" do
+          context "of type list" do
+
+          it "should split comma separated fields by default" do
+            hash = Blitz::Curl.parse_cli %w[-v:myvar list[9,3,1,2] POST /faq]
+            hash['steps'][0]['variables']['myvar']['entries'].should == ["9","3","1","2"]
+            end
+          end
+
+          it "should split custom separator fields" do
+            hash = Blitz::Curl.parse_cli %w[-v:myvar list[9$$$3$$$1$$$2]sep:$$$ POST /faq]
+            hash['steps'][0]['variables']['myvar']['entries'].should == ["9","3","1","2"]
+          end
+
+          it "should split custom separator fields and allow for string json objects" do
+            hash = Blitz::Curl.parse_cli %w[-v:myvar list[{"prop":"value"}~<$$>~{"prop":"value2"} ]sep:~<$$>~ POST /faq]
+            hash['steps'][0]['variables']['myvar']['entries'].should == ['{"prop":"value"}','{"prop":"value2"}']
+          end
+
+        end
+
     end
     
     describe "xargv" do

@@ -154,9 +154,16 @@ class Curl
 
                     step['variables'] ||= Hash.new
                     vhash = step['variables'][vname] = Hash.new
-                    if vargs.match /^(list)?\[([^\]]+)\]$/
+                    if vargs.match /^(list)?\[([^\]]+)\](sep:([^\w]+)?)?$/
+
+                        if $4.nil?
+                          split_string = ','
+                        else
+                          split_string = $4
+                        end
+
                         vhash['type'] = 'list'
-                        vhash['entries'] = $2.split(',')
+                        vhash['entries'] = $2.split(split_string)
                     elsif vargs.match /^(a|alpha)$/
                         vhash['type'] = 'alpha'
                     elsif vargs.match /^(a|alpha)\[(\d+),(\d+)(,(\d+))??\]$/
